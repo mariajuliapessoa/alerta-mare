@@ -17,7 +17,11 @@ interface TabuaDia {
   altura4: string
 }
 
-export default function PrevisaoSpot({ params }: { params: { spot: string } }) {
+interface PageProps {
+  params: { spot: string }
+}
+
+export default function PrevisaoSpot({ params }: PageProps) {
   const { spot } = params
   const [data, setData] = useState<number[]>([])
   const [labels, setLabels] = useState<string[]>([])
