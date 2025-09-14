@@ -1,9 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-// Update the import path if the file is located elsewhere, for example:
 import SpotChartClient from '../../../components/SpotChartClient'
-// Or ensure that '../../components/SpotChartClient.tsx' exists in your project.
 import { normalizeName } from '@lib/normalize'
 
 interface TabuaDia {
@@ -19,7 +17,8 @@ interface TabuaDia {
   altura4: string
 }
 
-export default function SpotPage({ params }: { params: { spot: string } }) {
+export default function PrevisaoSpot({ params }: { params: { spot: string } }) {
+  const { spot } = params
   const [data, setData] = useState<number[]>([])
   const [labels, setLabels] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,7 +30,7 @@ export default function SpotPage({ params }: { params: { spot: string } }) {
     setData([])
     setLabels([])
 
-    const spotKey = normalizeName(decodeURIComponent(params.spot))
+    const spotKey = normalizeName(decodeURIComponent(spot))
 
     fetch(`/api/mare?spot=${spotKey}`)
       .then(res => res.json())
@@ -52,7 +51,7 @@ export default function SpotPage({ params }: { params: { spot: string } }) {
         const horario: string[] = []
 
         json.dados.forEach((dia: TabuaDia) => {
-          ['1','2','3','4'].forEach(i => {
+          ['1', '2', '3', '4'].forEach(i => {
             const h = dia[`hora${i}` as keyof TabuaDia] as string
             const a = dia[`altura${i}` as keyof TabuaDia] as string
             if (h && a) {
@@ -74,14 +73,14 @@ export default function SpotPage({ params }: { params: { spot: string } }) {
         setError('Erro ao buscar dados da API.')
         setLoading(false)
       })
-  }, [params.spot])
+  }, [spot])
 
   if (loading) return <p>Carregando dados...</p>
   if (error) return <p className="text-red-600">{error}</p>
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Previsão para {params.spot}</h1>
+      <h1 className="text-2xl font-bold mb-4">Previsão para {spot.replace(/_/g, ' ')}</h1>
       {data.length > 0 ? (
         <SpotChartClient data={data} labels={labels} />
       ) : (
