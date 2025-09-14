@@ -1,22 +1,37 @@
-import fs from 'fs'
-import path from 'path'
+'use client'
+
+import { useEffect, useState } from 'react'
 import SpotChartClient from '../../../components/SpotChartClient'
+
+interface PrevisaoItem {
+  hora: string
+  altura: number
+}
 
 interface PrevisaoProps {
   params: { slug: string }
 }
 
 export default function Previsao({ params }: PrevisaoProps) {
-  const slug = params.slug
-  const jsonPath = path.join(process.cwd(), 'app', 'previsao', 'jsons', `${slug}.json`)
+  const { slug } = params
+  const [dados, setDados] = useState<PrevisaoItem[]>([])
+  const [error, setError] = useState(false)
 
-  if (!fs.existsSync(jsonPath)) {
-    return <h1>404 - Dados não encontrados</h1>
-  }
+  useEffect(() => {
+    fetch(`/jsons/${slug}.json`)
+      .then(res => {
+        if (!res.ok) throw new Error('Dados não encontrados')
+        return res.json()
+      })
+      .then(setDados)
+      .catch(() => setError(true))
+  }, [slug])
 
-  const dados = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'))
-  const labels = dados.map((item: any) => item.hora)
-  const values = dados.map((item: any) => item.altura)
+  if (error) return <h1>404 - Dados não encontrados</h1>
+  if (!dados.length) return <p>Carregando...</p>
+
+  const labels = dados.map(item => item.hora)
+  const values = dados.map(item => item.altura)
 
   return (
     <div className="container mx-auto p-4">
