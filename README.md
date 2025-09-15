@@ -1,212 +1,158 @@
-# Alerta Mare - Previsão de Marés
+# Alerta Maré
 
-## Descrição do Projeto
+Sistema completo para consulta automatizada do **nível da maré** no Brasil.
+Inclui:
 
-O **Alerta Mare** é uma aplicação para previsão de marés em praias brasileiras. O projeto utiliza dados históricos de marés em formato CSV/JSON, treina um modelo de aprendizado de máquina (XGBoost) e disponibiliza uma API para consulta de previsões em qualquer praia, incluindo praias não presentes no dataset histórico, utilizando latitude e longitude obtidas via JSON externo.
-
-O sistema foi desenvolvido em Python e FastAPI, permitindo consultas via navegador, `curl` ou integração com frontends e aplicativos móveis.
-
----
-
-## Estrutura do Projeto
-
-```
-alerta-mare/
-│
-├── app.py                  # Script principal FastAPI
-├── previsoes.py            # Funções para previsão de maré (normalização, criação de features, previsão)
-├── modelo/                 
-│   └── modelo_xgb.pkl      # Modelo XGBoost treinado e salvo com pickle
-├── public/
-│   └── praias.json         # JSON com latitude e longitude de praias adicionais
-├── data/
-│   └── mares.csv           # Dataset histórico de marés
-├── venv/                   # Ambiente virtual
-├── requirements.txt        # Dependências Python
-└── README.md
-```
+* **Backend (FastAPI)** → API de previsões de maré.
+* **Frontend (Next.js + TailwindCSS)** → Interface web moderna.
+* **Scripts (Node.js)** → Tratamento de dados e geração de arquivos auxiliares.
+* **Base de dados CSV** → Informações históricas e processadas da maré.
 
 ---
 
-## Pré-requisitos
+## Objetivo
 
-* Python >= 3.11
-* Git
-* Pip
-* Recomendado: criar um ambiente virtual (`venv`)
+O projeto resolve o problema de Marcelo, que precisava consultar manualmente em vários sites o nível da maré antes de surfar.
+Com essa solução, ele pode acessar **via navegador ou API** os dados mais recentes da maré em Itapuama e, futuramente, em qualquer praia do Brasil.
 
 ---
 
-## Instalação
+## Requisitos
 
-1. **Clonar o repositório**
+Você precisará ter instalado:
+
+* [Python 3.9+](https://www.python.org/downloads/)
+* [Node.js 18+](https://nodejs.org/en/download/)
+* [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) ou [yarn](https://yarnpkg.com/)
+* [Git](https://git-scm.com/downloads)
+* [Docker](https://www.docker.com/get-started) (opcional, para rodar containerizado)
+
+---
+
+## Instalação e Execução
+
+### Clone o repositório
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/seu-usuario/alerta-mare.git
 cd alerta-mare
 ```
 
-2. **Criar e ativar ambiente virtual**
+### Configuração do ambiente
 
-Windows PowerShell:
+Crie o arquivo `.env` na raiz do projeto (baseado em `.env.example`) e ajuste as variáveis conforme necessário.
+
+---
+
+### Backend (FastAPI)
 
 ```bash
+# Ative o ambiente virtual
 python -m venv venv
-& "venv/Scripts/Activate.ps1"
-```
+source venv/bin/activate   # Linux/Mac
+venv\Scripts\activate      # Windows
 
-Linux/Mac:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-3. **Instalar dependências**
-
-```bash
+# Instale dependências
 pip install -r requirements.txt
-```
 
-Dependências principais:
-
-* fastapi
-* uvicorn
-* pandas
-* numpy
-* xgboost
-* scikit-learn
-
----
-
-## Treinamento e Salvamento do Modelo
-
-> Caso queira treinar o modelo novamente no notebook:
-
-```python
-import pickle
-import xgboost as xgb
-
-# Treinar seu modelo XGBoost
-model = xgb.XGBRegressor(
-    learning_rate=0.05,
-    max_depth=6,
-    n_estimators=500,
-    colsample_bytree=0.8
-)
-
-model.fit(X_train, y_train)
-
-# Salvar o modelo
-with open("modelo/modelo_xgb.pkl", "wb") as f:
-    pickle.dump(model, f)
-```
-
-> Se você já possui `modelo_xgb.pkl`, pode pular esta etapa.
-
----
-
-## Estrutura das Funções de Previsão
-
-O arquivo `previsoes.py` contém:
-
-* `normalizar_nome_praia(nome_usuario)`
-  Converte nomes digitados pelo usuário para o formato do dataset, remove acentos e espaços.
-
-* `criar_features(latitude, longitude, data_str, hora_str)`
-  Converte data e hora em features contínuas (sen/cos de hora, mês e dia da semana) para o modelo.
-
-* `prever_mare_auto(nome_usuario, data_str, df, model, hora_str='12:00', json_path="public/praias.json")`
-  Retorna a previsão de maré para qualquer praia, usando dados do dataset ou JSON externo.
-
----
-
-## Executando a API
-
-1. **Ativar ambiente virtual** (se ainda não ativo):
-
-```bash
-& "venv/Scripts/Activate.ps1"
-```
-
-2. **Iniciar servidor FastAPI**
-
-```bash
+# Rode o backend
 uvicorn app:app --reload
 ```
 
-Por padrão, o servidor será iniciado em `http://127.0.0.1:8000`.
-
-3. **Acessando documentação automática**
-
-* FastAPI fornece interface Swagger:
-  `http://127.0.0.1:8000/docs`
-* Documentação alternativa Redoc:
-  `http://127.0.0.1:8000/redoc`
+Endereço da API:
+[http://127.0.0.1:8000](http://127.0.0.1:8000)
+Documentação Swagger: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
-## Exemplos de Consulta
-
-**Consulta via navegador ou curl:**
+### Frontend (Next.js + TailwindCSS)
 
 ```bash
-curl -X GET "http://127.0.0.1:8000/prever?praia=Itapuama&data=2025-01-01&hora=14:30" -H "accept: application/json"
+# Instale dependências
+npm install   # ou yarn install
+
+# Rode o frontend
+npm run dev   # ou yarn dev
 ```
 
-**Resposta esperada:**
+O frontend ficará disponível em:
+[http://localhost:3000](http://localhost:3000)
 
-```json
-[
+---
+
+### Scripts auxiliares (Node.js)
+
+Você tem scripts JS para manipulação e normalização de dados:
+
+```bash
+# Corrige datas do dataset
+node corrigirDatas.js
+
+# Gera JSONs de previsão
+node generateJSONs.js
+```
+
+---
+
+## Exemplos de Endpoints
+
+Quando abrir o Swagger UI em [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs), você verá algo como:
+
+```
+GET /
+  Summary: Status da API
+  Response:
+  {
+    "status": "ok",
+    "message": "API Alerta Maré ativa"
+  }
+
+GET /mare/itapuama
+  Summary: Retorna o nível da maré para Itapuama
+  Response:
   {
     "praia": "Itapuama",
-    "data": "2025-01-01",
-    "hora": "14:30",
-    "altura_prevista": 1.232759
+    "data": "2025-09-15",
+    "mare": [
+      {"hora": "06:00", "altura": "1.2m"},
+      {"hora": "12:00", "altura": "0.5m"},
+      {"hora": "18:00", "altura": "1.4m"}
+    ]
   }
-]
-```
 
-> O campo `altura_prevista` é calculado pelo modelo XGBoost baseado em latitude, longitude, data e hora.
-
----
-
-## Atualização de Dados
-
-* O arquivo `public/praias.json` pode ser atualizado para adicionar novas praias.
-* O dataset `data/mares.csv` pode ser expandido com novos registros históricos.
-* Para que novas praias sejam reconhecidas automaticamente, utilize `normalizar_nome_praia()` ou adicione ao JSON.
-
----
-
-## Publicação
-
-1. Commit das mudanças:
-
-```bash
-git add .
-git commit -m "Implementação inicial do Alerta Mare com API FastAPI"
-```
-
-2. Push para o repositório remoto:
-
-```bash
-git push origin main
+GET /mare/{praia}
+  Summary: Consulta maré de qualquer praia cadastrada
+  Parameters:
+    - name: praia
+      in: path
+      required: true
+      example: "copacabana"
 ```
 
 ---
 
-## Notas Técnicas
+## Estrutura do projeto
 
-* O modelo XGBoost espera features específicas: latitude, longitude, hora\_sin, hora\_cos, mes\_sin, mes\_cos, dia\_sin, dia\_cos.
-* A API FastAPI inclui tratamento de erros:
-
-  * `404`: praia não encontrada no dataset ou JSON
-  * `500`: erro interno na função de previsão
-* Todos os nomes de praias digitados pelo usuário são normalizados para minimizar erros de digitação.
-
----
-
-Se você quiser, posso também escrever uma **versão resumida do README** com instruções de execução rápida para usuários que só querem testar a API localmente, sem tanta parte técnica.
-
-Quer que eu faça isso?
+```
+alerta-mare/
+│── app.py                # API FastAPI
+│── previsoes.py          # Lógica de previsão de maré
+│── corrigirDatas.js      # Script Node.js para ajustar datas
+│── generateJSONs.js      # Script Node.js para gerar arquivos JSON
+│── dataset_mare.csv      # Dados originais
+│── dataset_mare_tratado.csv # Dados tratados
+│── package.json          # Dependências Node.js
+│── tailwind.config.ts    # Configuração do Tailwind
+│── next.config.js        # Configuração do Next.js
+│── requirements.txt      # Dependências Python
+│── .env.example          # Exemplo de variáveis de ambiente
+│
+├── app/                  # Backend (FastAPI)
+├── components/           # Componentes React (frontend)
+├── lib/                  # Funções auxiliares frontend
+├── model/                # Modelos de dados (Pydantic, etc.)
+├── public/               # Arquivos estáticos frontend
+├── scripts/              # Scripts auxiliares
+├── tabuas25/             # Dados de tábuas de maré
+└── venv/                 # Ambiente virtual Python
+```
