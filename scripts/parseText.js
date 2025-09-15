@@ -1,9 +1,7 @@
-// scripts/parseText.js
 const fs = require('fs');
 const pdf = require('pdf-parse');
 const TabuaDia = require('./TabuaDia.js');
 
-// Mapeamento de dias da semana, normalizando acentos
 const diasMap = {
   "SEG": "SEG", "TER": "TER", "QUA": "QUA",
   "QUI": "QUI", "SEX": "SEX", "SAB": "SAB", "SÁB": "SAB",
@@ -19,11 +17,9 @@ function parseText(text) {
   let month = 1;
   let year = null;
 
-  // Normaliza acentos e múltiplos espaços
   text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   text = text.replace(/\s+/g, " ");
 
-  // Extrai o ano (primeiro número de 4 dígitos que aparecer)
   const anoMatch = text.match(/\b(\d{4})\b/);
   if (anoMatch) year = anoMatch[1];
 
@@ -58,7 +54,6 @@ function parseText(text) {
   return arrayDay;
 }
 
-// Função robusta para processar PDF
 async function processarTabelaMare(pdfPath) {
   if (!fs.existsSync(pdfPath)) {
     console.warn('[processarTabelaMare] PDF não encontrado:', pdfPath);

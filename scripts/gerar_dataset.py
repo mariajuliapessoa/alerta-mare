@@ -3,7 +3,6 @@ import json
 import pandas as pd
 from datetime import datetime
 
-# Caminhos dos arquivos
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_DIR = os.path.join(BASE_DIR, "..", "public")
 PRAIAS_FILE = os.path.join(PUBLIC_DIR, "praias.json")
@@ -17,7 +16,7 @@ def carregar_praias():
 def processar_previsoes(praia_id, praia_info):
     previsao_file = os.path.join(PREVISOES_DIR, f"{praia_id}.json")
     if not os.path.exists(previsao_file):
-        print(f"⚠️ Arquivo de previsão não encontrado para {praia_id}")
+        print(f" Arquivo de previsão não encontrado para {praia_id}")
         return []
 
     with open(previsao_file, "r", encoding="utf-8") as f:
@@ -28,11 +27,10 @@ def processar_previsoes(praia_id, praia_info):
         data = datetime.strptime(p["data"], "%d/%m/%Y").strftime("%Y-%m-%d")
         mes = datetime.strptime(p["data"], "%d/%m/%Y").strftime("%m")
 
-        for i in range(1, 5):  # hora1/altura1 até hora4/altura4
+        for i in range(1, 5): 
             hora = p.get(f"hora{i}")
             altura = p.get(f"altura{i}")
             if hora and altura:
-                # formatar hora no padrão HH:MM
                 hora_formatada = f"{hora[:2]}:{hora[2:]}"
                 registros.append({
                     "praia": praia_info["nome"],
@@ -54,12 +52,12 @@ def main():
         todos_registros.extend(registros)
 
     if not todos_registros:
-        print("❌ Nenhum registro processado!")
+        print("Nenhum registro processado!")
         return
 
     df = pd.DataFrame(todos_registros)
     df.to_csv(OUTPUT_FILE, index=False, encoding="utf-8")
-    print(f"✅ Dataset salvo em {OUTPUT_FILE}")
+    print(f"Dataset salvo em {OUTPUT_FILE}")
     print(df.head(10))
 
 if __name__ == "__main__":
