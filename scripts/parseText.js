@@ -27,26 +27,22 @@ function parseText(text) {
   const anoMatch = text.match(/\b(\d{4})\b/);
   if (anoMatch) year = anoMatch[1];
 
-  // Quebra o texto em tokens por espaço
   const tokens = text.split(" ");
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i].toUpperCase();
 
-    // Identifica dia da semana
     if (diaNome(token) && i >= 1) {
       const dayNum = tokens[i - 1].padStart(2, "0");
       const temp_day = new TabuaDia();
       temp_day.dia = diasMap[token];
       temp_day.data = `${dayNum}/${month.toString().padStart(2, "0")}/${year}`;
 
-      // Ajusta mês se o dia atual for menor que o anterior
       if (arrayDay.length) {
         const priorday = arrayDay[arrayDay.length - 1].data;
         if (parseInt(dayNum) < parseInt(priorday.substr(0, 2))) month++;
       }
 
-      // Extrai até 4 pares hora/altura
       let j = i + 1;
       for (let k = 1; k <= 4; k++) {
         if (j + 1 >= tokens.length) break;
@@ -62,10 +58,21 @@ function parseText(text) {
   return arrayDay;
 }
 
-async function processarTabelaMare(filePath) {
-  const dataBuffer = fs.readFileSync(filePath);
-  const data = await pdf(dataBuffer);
-  return parseText(data.text);
+// Função robusta para processar PDF
+async function processarTabelaMare(pdfPath) {
+  if (!fs.existsSync(pdfPath)) {
+    console.warn('[processarTabelaMare] PDF não encontrado:', pdfPath);
+    return [];
+  }
+
+  try {
+    const dataBuffer = fs.readFileSync(pdfPath);
+    const pdfData = await pdf(dataBuffer);
+    return parseText(pdfData.text);
+  } catch (err) {
+    console.error('[processarTabelaMare] Erro ao processar PDF:', pdfPath, err);
+    return [];
+  }
 }
 
 module.exports = { processarTabelaMare };
